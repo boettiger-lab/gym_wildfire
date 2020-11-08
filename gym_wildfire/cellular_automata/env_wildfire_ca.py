@@ -4,7 +4,7 @@ from gym import spaces, logger, error, utils
 from gym.utils import seeding
 import random
 import time
-from wildfire_ca import wildfireCA
+from gym_wildfire.cellular_automata.wildfire_ca import wildfireCA
 from tkinter import *
 
 NO_FUEL = [0]
@@ -24,15 +24,15 @@ class EnvWildfireCA(gym.Env):
         self.observation_space = spaces.Box(low=0, high=3, shape=(20, 20), dtype=np.uint8)
         self.action_space = spaces.Discrete(20)
         self.wildfire_ca = wildfireCA()
-        self.tk = Tk()
-        self.canvas = Canvas(self.tk, bg='white', width=(500), height=(500), borderwidth=0, highlightthickness=0)
-        self.canvas.pack()
-        self.canvas_rect = {}
         self.time = 0
         self.display = display
         self.done = False
         if self.display:
             self.render()
+            self.tk = Tk()
+            self.canvas = Canvas(self.tk, bg='white', width=(500), height=(500), borderwidth=0, highlightthickness=0)
+            self.canvas.pack()
+            self.canvas_rect = {}
 
     def step(self, action):
         assert action in self.action_space

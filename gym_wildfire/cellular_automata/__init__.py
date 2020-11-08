@@ -1,0 +1,2 @@
+from gym_wildfire.cellular_automata.env_wildfire_ca import EnvWildfireCA
+from gym_wildfire.cellular_automata.wildfire_ca import *
