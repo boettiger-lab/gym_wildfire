@@ -12,7 +12,7 @@ BURNT = [3]
 
 class wildfireCA(CellularAutomaton):
     def __init__(self):
-        super().__init__(dimension=[20, 20],
+        super().__init__(dimension=[36, 36],
                          neighborhood=MooreNeighborhood(EdgeRule.IGNORE_MISSING_NEIGHBORS_OF_EDGE_CELLS))
 
     def init_cell_state(self, __):

@@ -20,13 +20,15 @@ class EnvWildfireCA(gym.Env):
 
     metadata = {"render.modes": ['human']}
 
-    def __init__(self, display=False):
-        self.observation_space = spaces.Box(low=0, high=3, shape=(20, 20), dtype=np.uint8)
-        self.action_space = spaces.Discrete(20)
+    def __init__(self, display=False, dimension=36):
+        self.dimension = dimension
+        self.observation_space = spaces.Box(low=0, high=255, shape=(self.dimension, self.dimension, 1), dtype=np.uint8)
+        self.action_space = spaces.Discrete(self.dimension)
         self.wildfire_ca = wildfireCA()
         self.time = 0
         self.display = display
         self.done = False
+        # NEED TO FIX DIMENSION OF CANVAS HERE AND IN RENDER
         if self.display:
             self.render()
             self.tk = Tk()
@@ -54,21 +56,26 @@ class EnvWildfireCA(gym.Env):
         self.wildfire_ca.evolve()
         if self.display:
             self.render()
-        return np.array(self.state).reshape(20, 20), self.reward, self.done, {}
+        return np.array(self.state).reshape(self.dimension, self.dimension, 1), self.reward, self.done, {}
 
     def reset(self):
         self.wildfire_ca = wildfireCA()
-        self.tk = Tk()
-        self.canvas = Canvas(self.tk, bg='white', width=(500), height=(500), borderwidth=0, highlightthickness=0)
-        self.canvas.pack()
-        self.canvas_rect = {}
         self.time = 0
         self.done = False
-        self.render()
+        if self.display:
+            self.tk = Tk()
+            self.canvas = Canvas(self.tk, bg='white', width=(500), height=(500), borderwidth=0, highlightthickness=0)
+            self.canvas.pack()
+            self.canvas_rect = {}
+            self.render()
+        self.state = []
+        for cell in self.wildfire_ca._current_state:
+            self.state.append(self.wildfire_ca._current_state[cell].state)
+        return np.array(self.state).reshape(self.dimension, self.dimension, 1)
 
     def render(self):
-        for column in range(20):
-            for row in range(20):
+        for column in range(self.dimension):
+            for row in range(self.dimension):
                 x1 = column * 25
                 y1 = row * 25
                 x2 = x1 + 25
