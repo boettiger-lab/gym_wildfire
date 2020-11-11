@@ -9,6 +9,8 @@ from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.env_checker import check_env
 from stable_baselines3.common.monitor import Monitor
 
+# Here I create a custom CNN policy. I don't have much insight on CNN's yet
+# but just roughly followed the example in the stable baselines3 documentation.
 class CustomCNN(BaseFeaturesExtractor):
     def __init__(self, observation_space: gym.spaces.Box, features_dim: int=256):
         super(CustomCNN, self).__init__(observation_space, features_dim)

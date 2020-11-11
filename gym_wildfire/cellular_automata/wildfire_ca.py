@@ -4,6 +4,7 @@ import os
 
 from cellular_automaton import CellularAutomaton, MooreNeighborhood, CAWindow, EdgeRule
 
+# Defining the numerical values describing the states of each cell
 NO_FUEL = [0]
 UNBURNED_FUEL = [80]
 BURNING_FUEL = [160]
@@ -16,6 +17,7 @@ class wildfireCA(CellularAutomaton):
                          neighborhood=MooreNeighborhood(EdgeRule.IGNORE_MISSING_NEIGHBORS_OF_EDGE_CELLS))
 
     def init_cell_state(self, __):
+        # Initializing the grid with the following probabilities
         rand = random.random()
         if rand < 0.75:
             init = UNBURNED_FUEL[0]
@@ -30,8 +32,11 @@ class wildfireCA(CellularAutomaton):
         new_cell_state = last_cell_state
         burning_neighbor_bool = self.__is_neighbor_burning(
             neighbors_last_states)
+        # If there is a burning cell in the neighborhood, then an unburned cell can
+        # ignite with probability 0.58
         if last_cell_state == UNBURNED_FUEL and burning_neighbor_bool and rand < 0.58:
             new_cell_state = BURNING_FUEL
+        # If a cell was burning in the last timestep, it extinguishes
         if last_cell_state == BURNING_FUEL:
             new_cell_state = BURNT
         return new_cell_state
@@ -45,6 +50,7 @@ class wildfireCA(CellularAutomaton):
 
 
 def state_to_color(current_state):
+    # Mapping states to colors if anyone wants to observe the dynamics graphically
     if current_state == NO_FUEL:
         return 0
     if current_state == UNBURNED_FUEL:

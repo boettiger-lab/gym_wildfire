@@ -12,6 +12,7 @@ UNBURNED_FUEL = [80]
 BURNING_FUEL = [160]
 BURNT = [240]
 
+# CMAP is a color map used in GUI display
 CMAP = {NO_FUEL[0]: "white", UNBURNED_FUEL[0]: "tan",
     BURNING_FUEL[0]: "red", BURNT[0]: "black"}
 
@@ -22,15 +23,14 @@ class EnvWildfireCA(gym.Env):
 
     def __init__(self, display=False, dimension=36):
         self.dimension = dimension
-        self.factor=20
+        self.factor=20 # This determines how big a cell will appear graphically
         self.display_width = self.factor * self.dimension
         self.observation_space = spaces.Box(low=0, high=255, shape=(self.dimension, self.dimension, 1), dtype=np.uint8)
-        self.action_space = spaces.MultiDiscrete([36 for i in range(16)])
+        self.action_space = spaces.MultiDiscrete([36 for i in range(16)]) # An agent can select 8 cells for preventative burns
         self.wildfire_ca = wildfireCA()
         self.time = 0
         self.display = display
         self.done = False
-        # NEED TO FIX DIMENSION OF CANVAS HERE AND IN RENDER
         if self.display:
             self.tk = Tk()
             self.canvas = Canvas(self.tk, bg='white', width=(self.display_width), height=(self.display_width), 
@@ -41,21 +41,24 @@ class EnvWildfireCA(gym.Env):
 
     def step(self, action):
         assert action in self.action_space
+        # Here I make a list of positions for the intervention based on the action
         position_list = [(action[i], action[i+1]) for i in range(0, len(action), 2)]
-        self.time += 1
+        self.time += 1 # Advance a timestep
         self.state = []
         self.reward = 0
-        # Recording the state and reward; altering the env acc to the action
+        # Going through every cell in the model
         for cell in self.wildfire_ca._current_state:
+            # Where there is a preventative burn inputted in action, burn the cell
             if cell in position_list and self.wildfire_ca._current_state[cell].state != NO_FUEL:
                 self.wildfire_ca._current_state[cell].state = BURNT
+            # Penalize the agent based on how many actively burning cells there are
             if self.wildfire_ca._current_state[cell].state == BURNING_FUEL:
                 self.reward -= 1
-        # Keeping track of the time
         if self.time == 100 or self.reward == 0:
             self.done = True
         # Taking the next time step
         self.wildfire_ca.evolve()
+        # Recording the state to report as the observation
         for cell in self.wildfire_ca._current_state:
             self.state.append(self.wildfire_ca._current_state[cell].state)
         if self.display:
@@ -69,6 +72,7 @@ class EnvWildfireCA(gym.Env):
         if self.display:
             self.render()
         self.state = []
+        # Recording the state to report
         for cell in self.wildfire_ca._current_state:
             self.state.append(self.wildfire_ca._current_state[cell].state)
         return np.array(self.state).reshape(self.dimension, self.dimension, 1)
