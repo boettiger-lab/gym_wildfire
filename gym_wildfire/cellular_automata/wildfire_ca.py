@@ -18,11 +18,11 @@ class wildfireCA(CellularAutomaton):
     def init_cell_state(self, __):
         rand = random.random()
         if rand < 0.75:
-            init = 1
-        if rand < 0.9995 and rand >= 0.75:
-            init = 0
-        if rand >= 0.9995:
-            init = 2
+            init = UNBURNED_FUEL[0]
+        if rand < 0.999 and rand >= 0.75:
+            init = NO_FUEL[0]
+        if rand >= 0.999:
+            init = BURNING_FUEL[0]
         return [init]
 
     def evolve_rule(self, last_cell_state, neighbors_last_states):

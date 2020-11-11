@@ -1,0 +1,7 @@
+README.md
+setup.py
+gym_wildfire/__init__.py
+gym_wildfire.egg-info/PKG-INFO
+gym_wildfire.egg-info/SOURCES.txt
+gym_wildfire.egg-info/dependency_links.txt
+gym_wildfire.egg-info/top_level.txt

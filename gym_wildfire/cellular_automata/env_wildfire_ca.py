@@ -45,19 +45,19 @@ class EnvWildfireCA(gym.Env):
         self.time += 1
         self.state = []
         self.reward = 0
-        import pdb; pdb.set_trace()
         # Recording the state and reward; altering the env acc to the action
         for cell in self.wildfire_ca._current_state:
-            self.state.append(self.wildfire_ca._current_state[cell].state)
-            if cell in position_list and self.wildfire_ca._current_state[cell].state != NO_FUEL and self.time<5:
+            if cell in position_list and self.wildfire_ca._current_state[cell].state != NO_FUEL:
                 self.wildfire_ca._current_state[cell].state = BURNT
             if self.wildfire_ca._current_state[cell].state == BURNING_FUEL:
                 self.reward -= 1
         # Keeping track of the time
-        if self.time == 100:
+        if self.time == 100 or self.reward == 0:
             self.done = True
         # Taking the next time step
         self.wildfire_ca.evolve()
+        for cell in self.wildfire_ca._current_state:
+            self.state.append(self.wildfire_ca._current_state[cell].state)
         if self.display:
             self.render()
         return np.array(self.state).reshape(self.dimension, self.dimension, 1), self.reward, self.done, {}
@@ -67,11 +67,6 @@ class EnvWildfireCA(gym.Env):
         self.time = 0
         self.done = False
         if self.display:
-            self.tk = Tk()
-            self.canvas = Canvas(self.tk, bg='white', width=(self.display_width), height=(self.display_width), 
-                                 borderwidth=0, highlightthickness=0)
-            self.canvas.pack()
-            self.canvas_rect = {}
             self.render()
         self.state = []
         for cell in self.wildfire_ca._current_state:
