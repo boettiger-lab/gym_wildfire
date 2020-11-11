@@ -8,9 +8,9 @@ from gym_wildfire.cellular_automata.wildfire_ca import wildfireCA
 from tkinter import *
 
 NO_FUEL = [0]
-UNBURNED_FUEL = [1]
-BURNING_FUEL = [2]
-BURNT = [3]
+UNBURNED_FUEL = [80]
+BURNING_FUEL = [160]
+BURNT = [240]
 
 CMAP = {NO_FUEL[0]: "white", UNBURNED_FUEL[0]: "tan",
     BURNING_FUEL[0]: "red", BURNT[0]: "black"}
@@ -22,30 +22,34 @@ class EnvWildfireCA(gym.Env):
 
     def __init__(self, display=False, dimension=36):
         self.dimension = dimension
+        self.factor=20
+        self.display_width = self.factor * self.dimension
         self.observation_space = spaces.Box(low=0, high=255, shape=(self.dimension, self.dimension, 1), dtype=np.uint8)
-        self.action_space = spaces.Discrete(self.dimension)
+        self.action_space = spaces.MultiDiscrete([36 for i in range(16)])
         self.wildfire_ca = wildfireCA()
         self.time = 0
         self.display = display
         self.done = False
         # NEED TO FIX DIMENSION OF CANVAS HERE AND IN RENDER
         if self.display:
-            self.render()
             self.tk = Tk()
-            self.canvas = Canvas(self.tk, bg='white', width=(500), height=(500), borderwidth=0, highlightthickness=0)
+            self.canvas = Canvas(self.tk, bg='white', width=(self.display_width), height=(self.display_width), 
+                                 borderwidth=0, highlightthickness=0)
             self.canvas.pack()
             self.canvas_rect = {}
+            self.render()
 
     def step(self, action):
         assert action in self.action_space
-        
+        position_list = [(action[i], action[i+1]) for i in range(0, len(action), 2)]
         self.time += 1
         self.state = []
         self.reward = 0
+        import pdb; pdb.set_trace()
         # Recording the state and reward; altering the env acc to the action
         for cell in self.wildfire_ca._current_state:
             self.state.append(self.wildfire_ca._current_state[cell].state)
-            if cell[0] == action and self.wildfire_ca._current_state[cell].state != NO_FUEL and self.time < 5:
+            if cell in position_list and self.wildfire_ca._current_state[cell].state != NO_FUEL and self.time<5:
                 self.wildfire_ca._current_state[cell].state = BURNT
             if self.wildfire_ca._current_state[cell].state == BURNING_FUEL:
                 self.reward -= 1
@@ -64,7 +68,8 @@ class EnvWildfireCA(gym.Env):
         self.done = False
         if self.display:
             self.tk = Tk()
-            self.canvas = Canvas(self.tk, bg='white', width=(500), height=(500), borderwidth=0, highlightthickness=0)
+            self.canvas = Canvas(self.tk, bg='white', width=(self.display_width), height=(self.display_width), 
+                                 borderwidth=0, highlightthickness=0)
             self.canvas.pack()
             self.canvas_rect = {}
             self.render()
@@ -76,10 +81,10 @@ class EnvWildfireCA(gym.Env):
     def render(self):
         for column in range(self.dimension):
             for row in range(self.dimension):
-                x1 = column * 25
-                y1 = row * 25
-                x2 = x1 + 25
-                y2 = y1 + 25
+                x1 = column * self.factor
+                y1 = row * self.factor
+                x2 = x1 + self.factor
+                y2 = y1 + self.factor
                 color = CMAP[self.wildfire_ca._current_state[(column, row)].state[0]]
                 self.canvas_rect[row, column] = self.canvas.create_rectangle(x1, y1, x2, y2, fill=color)
         self.tk.update()

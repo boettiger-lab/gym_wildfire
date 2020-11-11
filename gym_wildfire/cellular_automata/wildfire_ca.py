@@ -5,9 +5,9 @@ import os
 from cellular_automaton import CellularAutomaton, MooreNeighborhood, CAWindow, EdgeRule
 
 NO_FUEL = [0]
-UNBURNED_FUEL = [1]
-BURNING_FUEL = [2]
-BURNT = [3]
+UNBURNED_FUEL = [80]
+BURNING_FUEL = [160]
+BURNT = [240]
 
 
 class wildfireCA(CellularAutomaton):
@@ -19,9 +19,9 @@ class wildfireCA(CellularAutomaton):
         rand = random.random()
         if rand < 0.75:
             init = 1
-        if rand < 0.99 and rand >= 0.75:
+        if rand < 0.9995 and rand >= 0.75:
             init = 0
-        if rand >= 0.99:
+        if rand >= 0.9995:
             init = 2
         return [init]
 
@@ -56,14 +56,6 @@ def state_to_color(current_state):
 
 
 if __name__ == "__main__":
-    x = wildfireCA()
-    import pdb
-    pdb.set_trace()
-    for cell in x._current_state:
-        if cell[0] == 10 and x._current_state[cell] != NO_FUEL:
-            x._current_state[cell] = BURNT
-    x.evolve()
-    pdb.set_trace()
-    CAWindow(cellular_automaton=x,
+    CAWindow(cellular_automaton=wildfireCA(),
              window_size=(1000, 830),
              state_to_color_cb=state_to_color).run(evolutions_per_second=1)
