@@ -10,11 +10,12 @@ from tkinter import *
 NO_FUEL = [0]
 UNBURNED_FUEL = [80]
 BURNING_FUEL = [160]
-BURNT = [240]
+BURNED = [240]
+PREVENTATIVE_BURNED = [320]
 
 # CMAP is a color map used in GUI display
 CMAP = {NO_FUEL[0]: "white", UNBURNED_FUEL[0]: "tan",
-    BURNING_FUEL[0]: "red", BURNT[0]: "black"}
+    BURNING_FUEL[0]: "red", BURNED[0]: "black", PREVENTATIVE_BURNED[0]:"blue"}
 
 
 class EnvWildfireCA(gym.Env):
@@ -41,19 +42,23 @@ class EnvWildfireCA(gym.Env):
 
     def step(self, action):
         assert action in self.action_space
+        
         # Here I make a list of positions for the intervention based on the action
         position_list = [(action[i], action[i+1]) for i in range(0, len(action), 2)]
         self.time += 1 # Advance a timestep
         self.state = []
         self.reward = 0
+        
         # Going through every cell in the model
         for cell in self.wildfire_ca._current_state:
             # Where there is a preventative burn inputted in action, burn the cell
-            if cell in position_list and self.wildfire_ca._current_state[cell].state != NO_FUEL:
-                self.wildfire_ca._current_state[cell].state = BURNT
+            if cell in position_list and self.wildfire_ca._current_state[cell].state != NO_FUEL and \
+                                              self.wildfire_ca._current_state[cell].state != BURNED:
+                self.wildfire_ca._current_state[cell].state = PREVENTATIVE_BURNED
             # Penalize the agent based on how many actively burning cells there are
             if self.wildfire_ca._current_state[cell].state == BURNING_FUEL:
                 self.reward -= 1
+        
         if self.time == 100 or self.reward == 0:
             self.done = True
         # Taking the next time step
@@ -87,7 +92,7 @@ class EnvWildfireCA(gym.Env):
                 color = CMAP[self.wildfire_ca._current_state[(column, row)].state[0]]
                 self.canvas_rect[row, column] = self.canvas.create_rectangle(x1, y1, x2, y2, fill=color)
         self.tk.update()
-        time.sleep(1)
+        time.sleep(2)
 
 
     def close(self):
