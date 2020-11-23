@@ -20,16 +20,15 @@ class wildfireCA(CellularAutomaton):
         # Initializing the grid with the following probabilities
         rand = random.random()
         if rand < 0.75:
-            init = UNBURNED_FUEL[0]
-        if rand < 0.999 and rand >= 0.75:
-            init = NO_FUEL[0]
-        if rand >= 0.999:
-            init = BURNING_FUEL[0]
-        return [init]
+            init = UNBURNED_FUEL
+        if rand < 0.995 and rand >= 0.75:
+            init = NO_FUEL
+        if rand >= 0.995:
+            init = BURNING_FUEL
+        return init
 
     def evolve_rule(self, last_cell_state, neighbors_last_states):
         rand = random.random()
-        import pdb; pdb.set_trace()
         new_cell_state = last_cell_state
         burning_neighbor_bool = self.__is_neighbor_burning(
             neighbors_last_states)

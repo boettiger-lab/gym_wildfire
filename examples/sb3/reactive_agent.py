@@ -3,7 +3,7 @@ import gym_wildfire
 import numpy as np
 import argparse
 
-BURNING_FUEL = [160]
+BURNING_FUEL = [80]
 
 # Parsing CL arguments to allow for GUI display
 parser = argparse.ArgumentParser()
@@ -25,8 +25,8 @@ while done is False:
     action = []
     if len(indices[0]) > 0:
         center = (indices[0][0], indices[1][0])
-        for x, y in [(center[0]-1, center[1]-1), (center[0]-1, center[1]), 
-                     (center[0]-1, center[1]+1), (center[0], center[1]+1), 
+        for x, y in [(center[0]-1, center[1]-1), (center[0]-1, center[1]),
+                     (center[0]-1, center[1]+1), (center[0], center[1]+1),
                      (center[0], center[1]-1), (center[0]+1, center[1]-1),
                      (center[0]+1, center[1]), (center[0]+1, center[1]+1)]:
             if not (0 <= x < env.dimension and 0 <= y < env.dimension):

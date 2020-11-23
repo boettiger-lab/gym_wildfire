@@ -55,7 +55,8 @@ class EnvWildfireCA(gym.Env):
         for cell in self.wildfire_ca._current_state:
             # Where there is a preventative burn inputted in action, burn the cell
             if cell in position_list and self.wildfire_ca._current_state[cell].state != NO_FUEL and \
-                                              self.wildfire_ca._current_state[cell].state != BURNED:
+                                              self.wildfire_ca._current_state[cell].state != BURNED and \
+                                              self.wildfire_ca._current_state[cell].state != BURNING_FUEL:
                 self.wildfire_ca._current_state[cell].state = PREVENTATIVE_BURNED
             # Penalize the agent based on how many actively burning cells there are
             if self.wildfire_ca._current_state[cell].state == BURNING_FUEL:
