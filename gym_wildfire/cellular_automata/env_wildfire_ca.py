@@ -3,15 +3,16 @@ import gym
 from gym import spaces, logger, error, utils
 from gym.utils import seeding
 import random
+from pandas import DataFrame
 import time
 from gym_wildfire.cellular_automata.wildfire_ca import wildfireCA
 from tkinter import *
 
 NO_FUEL = [0]
-UNBURNED_FUEL = [80]
-BURNING_FUEL = [160]
-BURNED = [240]
-PREVENTATIVE_BURNED = [320]
+UNBURNED_FUEL = [40]
+BURNING_FUEL = [80]
+BURNED = [120]
+PREVENTATIVE_BURNED = [160]
 
 # CMAP is a color map used in GUI display
 CMAP = {NO_FUEL[0]: "white", UNBURNED_FUEL[0]: "tan",
@@ -30,11 +31,12 @@ class EnvWildfireCA(gym.Env):
         self.action_space = spaces.MultiDiscrete([36 for i in range(16)]) # An agent can select 8 cells for preventative burns
         self.wildfire_ca = wildfireCA()
         self.time = 0
+        self.Tmax = 100
         self.display = display
         self.done = False
         if self.display:
             self.tk = Tk()
-            self.canvas = Canvas(self.tk, bg='white', width=(self.display_width), height=(self.display_width), 
+            self.canvas = Canvas(self.tk, bg='white', width=(self.display_width), height=(self.display_width),
                                  borderwidth=0, highlightthickness=0)
             self.canvas.pack()
             self.canvas_rect = {}
@@ -59,7 +61,7 @@ class EnvWildfireCA(gym.Env):
             if self.wildfire_ca._current_state[cell].state == BURNING_FUEL:
                 self.reward -= 1
         
-        if self.time == 100 or self.reward == 0:
+        if self.time == self.Tmax or self.reward == 0:
             self.done = True
         # Taking the next time step
         self.wildfire_ca.evolve()
@@ -94,6 +96,21 @@ class EnvWildfireCA(gym.Env):
         self.tk.update()
         time.sleep(2)
 
+    def simulate(self, model, reps=1):
+        row = []
+        for rep in range(reps):
+            obs = self.reset()
+            reward = 0
+            action = None
+            for t in range(self.Tmax):
+                row.append([t, obs, action, reward, rep])
+                action, _state = model.predict(obs)
+                obs, reward, done, info = env.step(action)
+                if done:
+                    break
+            row.append([t+1, obs, action, reward, rep])
+        df = DataFrame(row, columns=['time', 'state', 'action', 'reward', 'rep'])
+        return df
 
     def close(self):
         pass

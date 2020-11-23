@@ -6,9 +6,9 @@ from cellular_automaton import CellularAutomaton, MooreNeighborhood, CAWindow, E
 
 # Defining the numerical values describing the states of each cell
 NO_FUEL = [0]
-UNBURNED_FUEL = [80]
-BURNING_FUEL = [160]
-BURNT = [240]
+UNBURNED_FUEL = [40]
+BURNING_FUEL = [80]
+BURNED = [120]
 
 
 class wildfireCA(CellularAutomaton):
@@ -29,6 +29,7 @@ class wildfireCA(CellularAutomaton):
 
     def evolve_rule(self, last_cell_state, neighbors_last_states):
         rand = random.random()
+        import pdb; pdb.set_trace()
         new_cell_state = last_cell_state
         burning_neighbor_bool = self.__is_neighbor_burning(
             neighbors_last_states)
@@ -38,7 +39,7 @@ class wildfireCA(CellularAutomaton):
             new_cell_state = BURNING_FUEL
         # If a cell was burning in the last timestep, it extinguishes
         if last_cell_state == BURNING_FUEL:
-            new_cell_state = BURNT
+            new_cell_state = BURNED
         return new_cell_state
 
     @staticmethod
@@ -57,7 +58,7 @@ def state_to_color(current_state):
         return 200
     if current_state == BURNING_FUEL:
         return 400
-    if current_state == BURNT:
+    if current_state == BURNED:
         return 600
 
 
