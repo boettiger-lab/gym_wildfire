@@ -95,21 +95,20 @@ class EnvWildfireCA(gym.Env):
                 color = CMAP[self.wildfire_ca._current_state[(column, row)].state[0]]
                 self.canvas_rect[row, column] = self.canvas.create_rectangle(x1, y1, x2, y2, fill=color)
         self.tk.update()
-        time.sleep(2)
+        time.sleep(1)
 
     def simulate(self, model, reps=1):
         row = []
         for rep in range(reps):
             obs = self.reset()
             reward = 0
-            action = None
             for t in range(self.Tmax):
-                row.append([t, obs, action, reward, rep])
                 action, _state = model.predict(obs)
-                obs, reward, done, info = env.step(action)
+                row.append([t, obs, action, reward, rep])
+                obs, reward, done, info = self.step(action)
                 if done:
                     break
-            row.append([t+1, obs, action, reward, rep])
+            row.append([t+1, obs, None, reward, rep])
         df = DataFrame(row, columns=['time', 'state', 'action', 'reward', 'rep'])
         return df
 

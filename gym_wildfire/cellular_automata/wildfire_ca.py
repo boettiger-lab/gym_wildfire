@@ -21,9 +21,9 @@ class wildfireCA(CellularAutomaton):
         rand = random.random()
         if rand < 0.75:
             init = UNBURNED_FUEL
-        if rand < 0.995 and rand >= 0.75:
+        if rand < 0.998 and rand >= 0.75:
             init = NO_FUEL
-        if rand >= 0.995:
+        if rand >= 0.998:
             init = BURNING_FUEL
         return init
 
