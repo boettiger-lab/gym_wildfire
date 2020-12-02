@@ -43,8 +43,7 @@ class EnvWildfireCA(gym.Env):
             self.render()
 
     def step(self, action):
-        assert action in self.action_space
-        
+        action = [i for i in action if i!= None]
         # Here I make a list of positions for the intervention based on the action
         position_list = [(action[i], action[i+1]) for i in range(0, len(action), 2)]
         self.time += 1 # Advance a timestep
@@ -54,9 +53,7 @@ class EnvWildfireCA(gym.Env):
         # Going through every cell in the model
         for cell in self.wildfire_ca._current_state:
             # Where there is a preventative burn inputted in action, burn the cell
-            if cell in position_list and self.wildfire_ca._current_state[cell].state != NO_FUEL and \
-                                              self.wildfire_ca._current_state[cell].state != BURNED and \
-                                              self.wildfire_ca._current_state[cell].state != BURNING_FUEL:
+            if cell in position_list and self.wildfire_ca._current_state[cell].state == UNBURNED_FUEL:
                 self.wildfire_ca._current_state[cell].state = PREVENTATIVE_BURNED
             # Penalize the agent based on how many actively burning cells there are
             if self.wildfire_ca._current_state[cell].state == BURNING_FUEL:

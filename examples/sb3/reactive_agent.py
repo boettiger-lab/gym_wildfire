@@ -34,7 +34,7 @@ while done is False:
             else:
                 action.extend((x, y))
     while len(action) < 16:
-        action.append(0)
+        action.append(None)
     obs, reward, done, _ = env.step(action)
     rewards.append(reward)
 
