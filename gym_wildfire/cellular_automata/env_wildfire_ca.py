@@ -28,10 +28,10 @@ class EnvWildfireCA(gym.Env):
         self.factor=20 # This determines how big a cell will appear graphically
         self.display_width = self.factor * self.dimension
         self.observation_space = spaces.Box(low=0, high=255, shape=(self.dimension, self.dimension, 1), dtype=np.uint8)
-        self.action_space = spaces.MultiDiscrete([36 for i in range(16)]) # An agent can select 8 cells for preventative burns
+        self.action_space = spaces.MultiDiscrete([36 for i in range(2)]) # An agent can select 2 cells for preventative burns
         self.wildfire_ca = wildfireCA()
         self.time = 0
-        self.Tmax = 100
+        self.Tmax = 800
         self.display = display
         self.done = False
         if self.display:
@@ -43,9 +43,12 @@ class EnvWildfireCA(gym.Env):
             self.render()
 
     def step(self, action):
-        action = [i for i in action if i!= None]
-        # Here I make a list of positions for the intervention based on the action
-        position_list = [(action[i], action[i+1]) for i in range(0, len(action), 2)]
+        action = list(action)
+        position_tup = ()
+        # I check to make sure that there are no Nones in the action
+        # as in my reactive_agent script, I use Nones to denote skipping an action
+        if action[0] != None:
+            position_tup = (action[0], action[1])
         self.time += 1 # Advance a timestep
         self.state = []
         self.reward = 0
@@ -53,7 +56,7 @@ class EnvWildfireCA(gym.Env):
         # Going through every cell in the model
         for cell in self.wildfire_ca._current_state:
             # Where there is a preventative burn inputted in action, burn the cell
-            if cell in position_list and self.wildfire_ca._current_state[cell].state == UNBURNED_FUEL:
+            if cell == position_tup and self.wildfire_ca._current_state[cell].state == UNBURNED_FUEL:
                 self.wildfire_ca._current_state[cell].state = PREVENTATIVE_BURNED
             # Penalize the agent based on how many actively burning cells there are
             if self.wildfire_ca._current_state[cell].state == BURNING_FUEL:
@@ -61,8 +64,9 @@ class EnvWildfireCA(gym.Env):
         
         if self.time == self.Tmax or self.reward == 0:
             self.done = True
-        # Taking the next time step
-        self.wildfire_ca.evolve()
+        # Only evolving every 8 time steps to allow agent to burn 8 cells at a time
+        if self.time % 8 == 0:
+            self.wildfire_ca.evolve()
         # Recording the state to report as the observation
         for cell in self.wildfire_ca._current_state:
             self.state.append(self.wildfire_ca._current_state[cell].state)
@@ -92,7 +96,7 @@ class EnvWildfireCA(gym.Env):
                 color = CMAP[self.wildfire_ca._current_state[(column, row)].state[0]]
                 self.canvas_rect[row, column] = self.canvas.create_rectangle(x1, y1, x2, y2, fill=color)
         self.tk.update()
-        time.sleep(1)
+        time.sleep(0.1)
 
     def simulate(self, model, reps=1):
         row = []

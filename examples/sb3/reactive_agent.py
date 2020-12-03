@@ -23,6 +23,7 @@ while done is False:
     # burns the (0, 0) cell repeatedly.
     indices = np.where(obs == BURNING_FUEL)
     action = []
+    position_list = []
     if len(indices[0]) > 0:
         center = (indices[0][0], indices[1][0])
         for x, y in [(center[0]-1, center[1]-1), (center[0]-1, center[1]),
@@ -32,11 +33,14 @@ while done is False:
             if not (0 <= x < env.dimension and 0 <= y < env.dimension):
                 continue
             else:
-                action.extend((x, y))
-    while len(action) < 16:
-        action.append(None)
-    obs, reward, done, _ = env.step(action)
-    rewards.append(reward)
+                position_list.extend([x, y])
+    for i in range(8):
+        if len(position_list) == 0:
+            obs, reward, done, _ = env.step([None, None])
+        else:
+            obs, reward, done, _ = env.step(position_list[:2])
+            position_list = position_list[2:]
+        rewards.append(reward)
 
 print(sum(rewards))
 
