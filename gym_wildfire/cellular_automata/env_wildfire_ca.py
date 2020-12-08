@@ -30,6 +30,7 @@ class EnvWildfireCA(gym.Env):
         self.observation_space = spaces.Box(low=0, high=255, shape=(self.dimension, self.dimension, 1), dtype=np.uint8)
         self.action_space = spaces.MultiDiscrete([36 for i in range(2)]) # An agent can select 2 cells for preventative burns
         self.wildfire_ca = wildfireCA()
+        self.lag = 8 # How many time steps do you allow agent to have before evolving model
         self.time = 0
         self.Tmax = 800
         self.display = display
@@ -65,7 +66,7 @@ class EnvWildfireCA(gym.Env):
         if self.time == self.Tmax or self.reward == 0:
             self.done = True
         # Only evolving every 8 time steps to allow agent to burn 8 cells at a time
-        if self.time % 8 == 0:
+        if self.time % self.lag == 0:
             self.wildfire_ca.evolve()
         # Recording the state to report as the observation
         for cell in self.wildfire_ca._current_state:
