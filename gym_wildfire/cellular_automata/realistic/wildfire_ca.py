@@ -3,7 +3,13 @@ import sys
 import os
 from copy import deepcopy
 from cellular_automaton import CellularAutomaton, MooreNeighborhood, CAWindow, EdgeRule
+from utils import *
 
+# Format for a cellular automata state is [fuel state, vegetation, density, altitude, (x, y)]
+# Fuel State: 0 - no fuel, 40 - unburned fuel, 80 - burning fuel, 120 - burned fuel, 160 - preventative burn
+# Vegetation: 40 - agricultural, 80 - thickets, 120 - hallepo-pine
+# Density: 40 - low density, 80 normal density, 120 - high density
+# Altitude: 
 
 NO_FUEL = 0
 UNBURNED_FUEL = 40
@@ -17,36 +23,58 @@ class wildfireCA(CellularAutomaton):
     def __init__(self):
         super().__init__(dimension=[36, 36],
                          neighborhood=MooreNeighborhood(EdgeRule.IGNORE_MISSING_NEIGHBORS_OF_EDGE_CELLS))
+        self.add_position_index()
+        self.wind_matrix = get_wind()
 
     def init_cell_state(self, __):
         # Initializing the grid with the following probabilities
         rand = random.random()
-        if rand < 0.99:
+        if rand < 0.998:
             init = UNBURNED_INIT
-        if rand >= 0.99:
+        if rand >= 0.998:
             init = BURNING_INIT
         return init
+
+    def add_position_index(self):
+        for cell in self._current_state:
+            # For whatever reason using `append` or += would add cell to every state;
+            # this is only fix I can find to remedy this issue -- don't know why this is
+            self._current_state[cell].state = self._current_state[cell].state + [cell]
 
     def evolve_rule(self, last_cell_state, neighbors_last_states):
         rand = random.random()
         new_cell_state = deepcopy(last_cell_state)
-        burning_neighbor_bool = self.__is_neighbor_burning(
-            neighbors_last_states)
         # If a cell was burning in the last timestep, it extinguishes
         if last_cell_state == BURNING_INIT:
             new_cell_state[0] = BURNED
         # If there is a burning cell in the neighborhood, then an unburned cell can
         # ignite with probability 0.58
-        if last_cell_state[0] == UNBURNED_FUEL and burning_neighbor_bool and rand < 0.58:
-            new_cell_state[0] = BURNING_FUEL
+        if last_cell_state[0] == UNBURNED_FUEL:
+            p_h = 0.58
+            a = .078
+            p_veg = {40:-.3, 80:.3, 120:.4}[last_cell_state[1]]
+            p_den = {40:-.3, 80:.3, 120:.3}[last_cell_state[2]]
+            for neighbor in neighbors_last_states:
+                if neighbor[0] == BURNING_FUEL:
+                    x_diff = neighbor[-1][0] - last_cell_state[-1][0]
+                    y_diff = neighbor[-1][1] - last_cell_state[-1][1]
+                    x_id = x_diff + 1
+                    y_id = y_diff + 1
+                    p_wind = self.wind_matrix[x_id][y_id]
+                    p_burn = p_h * (1 + p_veg) * (1 + p_den) * p_wind
+                    if random.random() < p_burn:
+                        new_cell_state[0] = BURNING_FUEL
+                        break
         return new_cell_state
 
     @staticmethod
-    def __is_neighbor_burning(neighbors):
-        if BURNING_FUEL in [neighbor[0] for neighbor in neighbors]:
-            return True
-        else:
-            return False
+    def get_burning_neighbors(neighbors):
+        burning_neighbors = []
+        for neighbor in neighbors:
+            if neighbor[0] == BURNING_FUEL:
+                burning_neighbors.append(neighbor)
+        return burning_neighbors
+
 
 
 def state_to_color(current_state):

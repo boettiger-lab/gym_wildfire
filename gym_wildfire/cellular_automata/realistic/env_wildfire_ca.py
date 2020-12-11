@@ -56,13 +56,13 @@ class EnvWildfireCA(gym.Env):
         self.state = []
         self.reward = 0
         # Going through every cell in the model
-#        for cell in self.wildfire_ca._current_state:
+        for cell in self.wildfire_ca._current_state:
            # Where there is a preventative burn inputted in action, burn the cell
-#            if cell == position_tup and self.wildfire_ca._current_state[cell].state[0] == UNBURNED_FUEL:
-#                self.wildfire_ca._current_state[cell].state[0] = PREVENTATIVE_BURNED
+            if cell == position_tup and self.wildfire_ca._current_state[cell].state[0] == UNBURNED_FUEL:
+                self.wildfire_ca._current_state[cell].state[0] = PREVENTATIVE_BURNED
             # Penalize the agent based on how many actively burning cells there are
-#            if self.wildfire_ca._current_state[cell].state[0] == BURNING_FUEL:
-#                self.reward -= 1
+            if self.wildfire_ca._current_state[cell].state[0] == BURNING_FUEL:
+                self.reward -= 1
         
         if self.time == self.Tmax or self.reward == 0:
             self.done = True
