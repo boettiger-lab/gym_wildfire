@@ -19,10 +19,8 @@ class wildfireCA(CellularAutomaton):
     def init_cell_state(self, __):
         # Initializing the grid with the following probabilities
         rand = random.random()
-        if rand < 0.75:
+        if rand < 0.998:
             init = UNBURNED_FUEL
-        if rand < 0.998 and rand >= 0.75:
-            init = NO_FUEL
         if rand >= 0.998:
             init = BURNING_FUEL
         return init
@@ -52,13 +50,13 @@ class wildfireCA(CellularAutomaton):
 def state_to_color(current_state):
     # Mapping states to colors if anyone wants to observe the dynamics graphically
     if current_state == NO_FUEL:
-        return 0
+        return 255, 100, 0
     if current_state == UNBURNED_FUEL:
-        return 200
+        return 100, 255, 0
     if current_state == BURNING_FUEL:
-        return 400
+        return 255, 0, 0
     if current_state == BURNED:
-        return 600
+        return 100, 100, 100
 
 
 if __name__ == "__main__":

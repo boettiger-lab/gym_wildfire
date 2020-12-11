@@ -5,18 +5,18 @@ from gym.utils import seeding
 import random
 from pandas import DataFrame
 import time
-from gym_wildfire.cellular_automata.wildfire_ca import wildfireCA
+from gym_wildfire.cellular_automata.realistic.wildfire_ca import wildfireCA
 from tkinter import *
 
-NO_FUEL = [0]
-UNBURNED_FUEL = [40]
-BURNING_FUEL = [80]
-BURNED = [120]
-PREVENTATIVE_BURNED = [160]
+NO_FUEL = 0
+UNBURNED_FUEL = 40
+BURNING_FUEL = 80
+BURNED = 120
+PREVENTATIVE_BURNED = 160
 
 # CMAP is a color map used in GUI display
-CMAP = {NO_FUEL[0]: "white", UNBURNED_FUEL[0]: "tan",
-    BURNING_FUEL[0]: "red", BURNED[0]: "black", PREVENTATIVE_BURNED[0]:"blue"}
+CMAP = {NO_FUEL: "white", UNBURNED_FUEL: "tan",
+    BURNING_FUEL: "red", BURNED: "black", PREVENTATIVE_BURNED:"blue"}
 
 
 class EnvWildfireCA(gym.Env):
@@ -33,7 +33,9 @@ class EnvWildfireCA(gym.Env):
         self.lag = 8 # How many time steps do you allow agent to have before evolving model
         self.time = 0
         self.Tmax = 800
+        self.sleep = 0.5
         self.display = display
+        self.debug_flag = False
         self.done = False
         if self.display:
             self.tk = Tk()
@@ -53,15 +55,14 @@ class EnvWildfireCA(gym.Env):
         self.time += 1 # Advance a timestep
         self.state = []
         self.reward = 0
-        
         # Going through every cell in the model
-        for cell in self.wildfire_ca._current_state:
-            # Where there is a preventative burn inputted in action, burn the cell
-            if cell == position_tup and self.wildfire_ca._current_state[cell].state == UNBURNED_FUEL:
-                self.wildfire_ca._current_state[cell].state = PREVENTATIVE_BURNED
+#        for cell in self.wildfire_ca._current_state:
+           # Where there is a preventative burn inputted in action, burn the cell
+#            if cell == position_tup and self.wildfire_ca._current_state[cell].state[0] == UNBURNED_FUEL:
+#                self.wildfire_ca._current_state[cell].state[0] = PREVENTATIVE_BURNED
             # Penalize the agent based on how many actively burning cells there are
-            if self.wildfire_ca._current_state[cell].state == BURNING_FUEL:
-                self.reward -= 1
+#            if self.wildfire_ca._current_state[cell].state[0] == BURNING_FUEL:
+#                self.reward -= 1
         
         if self.time == self.Tmax or self.reward == 0:
             self.done = True
@@ -73,7 +74,7 @@ class EnvWildfireCA(gym.Env):
             self.state.append(self.wildfire_ca._current_state[cell].state)
         if self.display:
             self.render()
-        return np.array(self.state).reshape(self.dimension, self.dimension, 1), self.reward, self.done, {}
+        return np.array(self.state).reshape(self.dimension, self.dimension, 4), self.reward, self.done, {}
 
     def reset(self):
         self.wildfire_ca = wildfireCA()
@@ -85,7 +86,7 @@ class EnvWildfireCA(gym.Env):
         # Recording the state to report
         for cell in self.wildfire_ca._current_state:
             self.state.append(self.wildfire_ca._current_state[cell].state)
-        return np.array(self.state).reshape(self.dimension, self.dimension, 1)
+        return np.array(self.state).reshape(self.dimension, self.dimension, 4)
 
     def render(self):
         for column in range(self.dimension):
@@ -94,10 +95,12 @@ class EnvWildfireCA(gym.Env):
                 y1 = row * self.factor
                 x2 = x1 + self.factor
                 y2 = y1 + self.factor
+                if self.debug_flag:
+                    import pdb; pdb.set_trace()
                 color = CMAP[self.wildfire_ca._current_state[(column, row)].state[0]]
                 self.canvas_rect[row, column] = self.canvas.create_rectangle(x1, y1, x2, y2, fill=color)
         self.tk.update()
-        time.sleep(0.1)
+        time.sleep(self.sleep)
 
     def simulate(self, model, reps=1):
         row = []
