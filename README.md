@@ -10,8 +10,6 @@ Run `pip install -e .` and `pip install -r requirements.txt` from the home direc
 
 So far, we have the following environments defined:
 
-- `wildfireCA-v0`: This defines a wildfire cellular automata model. The dynamics here are very simple and the agent is allowed to do prevantative burns in 8 cells at each timestep. 
+- `wildfireCA-v0`: This defines a wildfire cellular automata model, based off of [Alexandridis et al.](https://www.sciencedirect.com/science/article/abs/pii/S0096300308004943). The dynamics here are quite simple, allowing for wind, variation in vegetation type and density, and elevation. The agent is allowed to do a variable number of preventative burns per evolution. 
 
-## Future Directions
 
-After finding some decent agent behavior on this first environment, we plan on building additional cellular automata models that have more complex and accurate dynamics. Additionally, we will probably change the action space to be more realistic. The inspiration for creating this environment came from the recent [Purnomo et al. paper](https://www.sciencedirect.com/science/article/pii/S1540748920306490), which shows that cellular automata models can be very accurate for describing peat moss fires.
