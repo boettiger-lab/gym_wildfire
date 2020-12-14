@@ -19,12 +19,15 @@ PREVENTATIVE_BURN = 160
 UNBURNED_INIT = [40, 80, 80, 0]
 BURNING_INIT = [80, 80, 80, 0]
 
+thetas = [[45, 0, 45], [90, 0, 90], [135, 180, 135]]
+wind_velocity = 10
+
 class wildfireCA(CellularAutomaton):
-    def __init__(self):
+    def __init__(self, thetas, wind_velocity):
         super().__init__(dimension=[36, 36],
                          neighborhood=MooreNeighborhood(EdgeRule.IGNORE_MISSING_NEIGHBORS_OF_EDGE_CELLS))
         self.add_position_index()
-        self.wind_matrix = get_wind()
+        self.wind_matrix = get_wind(thetas, wind_velocity)
 
     def init_cell_state(self, __):
         # Initializing the grid with the following probabilities
@@ -40,12 +43,18 @@ class wildfireCA(CellularAutomaton):
             # For whatever reason using `append` or += would add cell to every state;
             # this is only fix I can find to remedy this issue -- don't know why this is
             self._current_state[cell].state = self._current_state[cell].state + [cell]
+            if cell[1] < 12:
+                self._current_state[cell].state[1] = 40
+            if 12 <= cell[1] < 24:
+                self._current_state[cell].state[1] = 80
+            if 24 <= cell[1] < 36:
+                self._current_state[cell].state[1] = 120
 
     def evolve_rule(self, last_cell_state, neighbors_last_states):
         rand = random.random()
         new_cell_state = deepcopy(last_cell_state)
         # If a cell was burning in the last timestep, it extinguishes
-        if last_cell_state == BURNING_INIT:
+        if last_cell_state[0] == BURNING_FUEL:
             new_cell_state[0] = BURNED
         # If there is a burning cell in the neighborhood, then an unburned cell can
         # ignite with probability 0.58
@@ -56,11 +65,9 @@ class wildfireCA(CellularAutomaton):
             p_den = {40:-.3, 80:.3, 120:.3}[last_cell_state[2]]
             for neighbor in neighbors_last_states:
                 if neighbor[0] == BURNING_FUEL:
-                    x_diff = neighbor[-1][0] - last_cell_state[-1][0]
-                    y_diff = neighbor[-1][1] - last_cell_state[-1][1]
-                    x_id = x_diff + 1
-                    y_id = y_diff + 1
-                    p_wind = self.wind_matrix[x_id][y_id]
+                    x_id = 1 + neighbor[-1][0] - last_cell_state[-1][0]
+                    y_id = 1 + neighbor[-1][1] - last_cell_state[-1][1]
+                    p_wind = self.wind_matrix[y_id][x_id]
                     p_burn = p_h * (1 + p_veg) * (1 + p_den) * p_wind
                     if random.random() < p_burn:
                         new_cell_state[0] = BURNING_FUEL
@@ -90,6 +97,6 @@ def state_to_color(current_state):
 
 
 if __name__ == "__main__":
-    CAWindow(cellular_automaton=wildfireCA(),
+    CAWindow(cellular_automaton=wildfireCA(thetas, wind_velocity),
              window_size=(1000, 830),
              state_to_color_cb=state_to_color).run(evolutions_per_second=1)
