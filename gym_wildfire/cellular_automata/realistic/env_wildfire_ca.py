@@ -23,17 +23,19 @@ class EnvWildfireCA(gym.Env):
 
     metadata = {"render.modes": ['human']}
 
-    def __init__(self, display=False, dimension=36):
+    def __init__(self, display=False, dimension=36, thetas=[[45, 0, 45], [90, 0, 90], [135, 180, 135]], wind_velocity=5):
         self.dimension = dimension
-        self.factor=20 # This determines how big a cell will appear graphically
+        self.factor = 20 # This determines how big a cell will appear graphically
         self.display_width = self.factor * self.dimension
         self.observation_space = spaces.Box(low=0, high=255, shape=(self.dimension, self.dimension, 1), dtype=np.uint8)
-        self.action_space = spaces.MultiDiscrete([36 for i in range(2)]) # An agent can select 2 cells for preventative burns
-        self.wildfire_ca = wildfireCA()
+        self.action_space = spaces.MultiDiscrete([self.dimension for i in range(2)]) # An agent can select 2 cells for preventative burns
+        self.wildfire_ca = wildfireCA(thetas=thetas, wind_velocity=wind_velocity, n_row=dimension, n_col=dimension)
+        self.thetas = thetas
+        self.wind_velocity = wind_velocity
         self.lag = 8 # How many time steps do you allow agent to have before evolving model
         self.time = 0
         self.Tmax = 800
-        self.sleep = 0.5
+        self.sleep = 0.05
         self.display = display
         self.debug_flag = False
         self.done = False
@@ -63,7 +65,7 @@ class EnvWildfireCA(gym.Env):
             # Penalize the agent based on how many actively burning cells there are
             if self.wildfire_ca._current_state[cell].state[0] == BURNING_FUEL:
                 self.reward -= 1
-        
+
         if self.time == self.Tmax or self.reward == 0:
             self.done = True
         # Only evolving every 8 time steps to allow agent to burn 8 cells at a time
@@ -71,13 +73,13 @@ class EnvWildfireCA(gym.Env):
             self.wildfire_ca.evolve()
         # Recording the state to report as the observation
         for cell in self.wildfire_ca._current_state:
-            self.state.append(self.wildfire_ca._current_state[cell].state)
+            self.state.append(self.wildfire_ca._current_state[cell].state[0])
         if self.display:
             self.render()
-        return np.array(self.state).reshape(self.dimension, self.dimension, 4), self.reward, self.done, {}
+        return np.array(self.state).reshape(self.dimension, self.dimension, 1), self.reward, self.done, {}
 
     def reset(self):
-        self.wildfire_ca = wildfireCA()
+        self.wildfire_ca = wildfireCA(thetas=self.thetas, wind_velocity=self.wind_velocity, n_row=self.dimension, n_col=self.dimension)
         self.time = 0
         self.done = False
         if self.display:
@@ -85,8 +87,8 @@ class EnvWildfireCA(gym.Env):
         self.state = []
         # Recording the state to report
         for cell in self.wildfire_ca._current_state:
-            self.state.append(self.wildfire_ca._current_state[cell].state)
-        return np.array(self.state).reshape(self.dimension, self.dimension, 4)
+            self.state.append(self.wildfire_ca._current_state[cell].state[0])
+        return np.array(self.state).reshape(self.dimension, self.dimension, 1)
 
     def render(self):
         for column in range(self.dimension):

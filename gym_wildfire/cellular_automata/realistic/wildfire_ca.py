@@ -3,7 +3,7 @@ import sys
 import os
 from copy import deepcopy
 from cellular_automaton import CellularAutomaton, MooreNeighborhood, CAWindow, EdgeRule
-from utils import *
+from gym_wildfire.cellular_automata.realistic.utils import *
 
 # Format for a cellular automata state is [fuel state, vegetation, density, altitude, (x, y)]
 # Fuel State: 0 - no fuel, 40 - unburned fuel, 80 - burning fuel, 120 - burned fuel, 160 - preventative burn
@@ -20,14 +20,17 @@ UNBURNED_INIT = [40, 80, 80, 0]
 BURNING_INIT = [80, 80, 80, 0]
 
 thetas = [[45, 0, 45], [90, 0, 90], [135, 180, 135]]
-wind_velocity = 10
+wind_velocity = 0
 
 class wildfireCA(CellularAutomaton):
-    def __init__(self, thetas, wind_velocity):
-        super().__init__(dimension=[36, 36],
+    def __init__(self, thetas, wind_velocity, n_row=36, n_col=36):
+        super().__init__(dimension=[n_row, n_col],
                          neighborhood=MooreNeighborhood(EdgeRule.IGNORE_MISSING_NEIGHBORS_OF_EDGE_CELLS))
+        self.n_row = n_row
+        self.n_col = n_col
         self.add_position_index()
         self.wind_matrix = get_wind(thetas, wind_velocity)
+        self.slope_matrix = get_slope(self)
 
     def init_cell_state(self, __):
         # Initializing the grid with the following probabilities
@@ -43,12 +46,7 @@ class wildfireCA(CellularAutomaton):
             # For whatever reason using `append` or += would add cell to every state;
             # this is only fix I can find to remedy this issue -- don't know why this is
             self._current_state[cell].state = self._current_state[cell].state + [cell]
-            if cell[1] < 12:
-                self._current_state[cell].state[1] = 40
-            if 12 <= cell[1] < 24:
-                self._current_state[cell].state[1] = 80
-            if 24 <= cell[1] < 36:
-                self._current_state[cell].state[1] = 120
+            self._current_state[cell].state[3] = cell[1]**4
 
     def evolve_rule(self, last_cell_state, neighbors_last_states):
         rand = random.random()
@@ -65,10 +63,14 @@ class wildfireCA(CellularAutomaton):
             p_den = {40:-.3, 80:.3, 120:.3}[last_cell_state[2]]
             for neighbor in neighbors_last_states:
                 if neighbor[0] == BURNING_FUEL:
-                    x_id = 1 + neighbor[-1][0] - last_cell_state[-1][0]
-                    y_id = 1 + neighbor[-1][1] - last_cell_state[-1][1]
-                    p_wind = self.wind_matrix[y_id][x_id]
+                    x_loc = 1 + neighbor[-1][0] - last_cell_state[-1][0]
+                    y_loc = 1 + neighbor[-1][1] - last_cell_state[-1][1]
+                    x_abs = last_cell_state[-1][0]
+                    y_abs = last_cell_state[-1][1]
+                    slope = self.slope_matrix[y_abs][x_abs][y_loc][x_loc]
+                    p_wind = self.wind_matrix[y_loc][x_loc]
                     p_burn = p_h * (1 + p_veg) * (1 + p_den) * p_wind
+                    p_slope = math.exp(a * slope)
                     if random.random() < p_burn:
                         new_cell_state[0] = BURNING_FUEL
                         break
