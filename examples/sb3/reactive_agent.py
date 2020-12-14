@@ -9,11 +9,11 @@ BURNING_FUEL = 80
 parser = argparse.ArgumentParser()
 parser.add_argument("--display", dest='display', action='store_true')
 parser.add_argument("--no-display", dest='display', action='store_false')
-parser.add_argument("--env", type=str, default="wildfireCA-v1")
+parser.add_argument("--env", type=str, default="wildfireCA-v0")
 parser.set_defaults(display=False)
 args = parser.parse_args()
 
-env = gym.make(args.env, display=args.display)
+env = gym.make(args.env, display=args.display, wind_velocity=25)
 obs = env.reset()
 rewards = []
 done = False
