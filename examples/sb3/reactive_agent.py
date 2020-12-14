@@ -3,16 +3,17 @@ import gym_wildfire
 import numpy as np
 import argparse
 
-BURNING_FUEL = [80]
+BURNING_FUEL = 80
 
 # Parsing CL arguments to allow for GUI display
 parser = argparse.ArgumentParser()
 parser.add_argument("--display", dest='display', action='store_true')
 parser.add_argument("--no-display", dest='display', action='store_false')
+parser.add_argument("--env", type=str, default="wildfireCA-v0")
 parser.set_defaults(display=False)
 args = parser.parse_args()
 
-env = gym.make("wildfireCA-v0", display=args.display)
+env = gym.make(args.env, display=args.display, wind_velocity=25)
 obs = env.reset()
 rewards = []
 done = False
@@ -21,7 +22,11 @@ while done is False:
     # Here I find where there are cells on fire, then I do preventative burns in
     # the Moore neighborhood. If there are additional actions available, the agent
     # burns the (0, 0) cell repeatedly.
-    indices = np.where(obs == BURNING_FUEL)
+    indices = [[] for i in range(len(obs))]
+    for index, row in enumerate(obs):
+        for x in row:
+            indices[index].append(x[0])
+    indices = np.where(np.array(indices) == BURNING_FUEL)
     action = []
     position_list = []
     if len(indices[0]) > 0:
