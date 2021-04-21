@@ -3,13 +3,13 @@ import sys
 import os
 from copy import deepcopy
 from cellular_automaton import CellularAutomaton, MooreNeighborhood, CAWindow, EdgeRule
-from gym_wildfire.cellular_automata.realistic.utils import *
+from gym_wildfire.cellular_automata.alexandridis_et_al.utils import *
 
 # Format for a cellular automata state is [fuel state, vegetation, density, altitude, (x, y)]
 # Fuel State: 0 - no fuel, 40 - unburned fuel, 80 - burning fuel, 120 - burned fuel, 160 - preventative burn
 # Vegetation: 40 - agricultural, 80 - thickets, 120 - hallepo-pine
 # Density: 40 - low density, 80 normal density, 120 - high density
-# Altitude: 
+# Altitude:
 
 NO_FUEL = 0
 UNBURNED_FUEL = 40
@@ -21,6 +21,7 @@ BURNING_INIT = [80, 80, 80, 0]
 
 thetas = [[45, 0, 45], [90, 0, 90], [135, 180, 135]]
 wind_velocity = 0
+
 
 class wildfireCA(CellularAutomaton):
     def __init__(self, thetas, wind_velocity, n_row=36, n_col=36):
@@ -59,8 +60,8 @@ class wildfireCA(CellularAutomaton):
         if last_cell_state[0] == UNBURNED_FUEL:
             p_h = 0.58
             a = .078
-            p_veg = {40:-.3, 80:.3, 120:.4}[last_cell_state[1]]
-            p_den = {40:-.3, 80:.3, 120:.3}[last_cell_state[2]]
+            p_veg = {40: -.3, 80: .3, 120: .4}[last_cell_state[1]]
+            p_den = {40: -.3, 80: .3, 120: .3}[last_cell_state[2]]
             for neighbor in neighbors_last_states:
                 if neighbor[0] == BURNING_FUEL:
                     x_loc = 1 + neighbor[-1][0] - last_cell_state[-1][0]
@@ -83,7 +84,6 @@ class wildfireCA(CellularAutomaton):
             if neighbor[0] == BURNING_FUEL:
                 burning_neighbors.append(neighbor)
         return burning_neighbors
-
 
 
 def state_to_color(current_state):
