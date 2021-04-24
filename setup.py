@@ -5,7 +5,14 @@ setup(
     name="gym_wildfire",
     version="0.0.0",
     packages=setuptools.find_packages(exclude=["docs", "scripts", "tests"]),
-    install_requires=["gym", "numpy", "pandas", "matplotlib", "cellular_automaton", "recordclass"],
+    install_requires=[
+        "gym",
+        "numpy",
+        "pandas",
+        "matplotlib",
+        "cellular_automaton",
+        "recordclass",
+    ],
     extras_require={
         "tests": [
             "stable-baselines3",
