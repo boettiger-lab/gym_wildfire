@@ -7,8 +7,8 @@ BURNING_FUEL = 80
 
 # Parsing CL arguments to allow for GUI display
 parser = argparse.ArgumentParser()
-parser.add_argument("--display", dest='display', action='store_true')
-parser.add_argument("--no-display", dest='display', action='store_false')
+parser.add_argument("--display", dest="display", action="store_true")
+parser.add_argument("--no-display", dest="display", action="store_false")
 parser.add_argument("--env", type=str, default="wildfireCA-v0")
 parser.set_defaults(display=False)
 args = parser.parse_args()
@@ -31,10 +31,16 @@ while done is False:
     position_list = []
     if len(indices[0]) > 0:
         center = (indices[0][0], indices[1][0])
-        for x, y in [(center[0]-1, center[1]-1), (center[0]-1, center[1]),
-                     (center[0]-1, center[1]+1), (center[0], center[1]+1),
-                     (center[0], center[1]-1), (center[0]+1, center[1]-1),
-                     (center[0]+1, center[1]), (center[0]+1, center[1]+1)]:
+        for x, y in [
+            (center[0] - 1, center[1] - 1),
+            (center[0] - 1, center[1]),
+            (center[0] - 1, center[1] + 1),
+            (center[0], center[1] + 1),
+            (center[0], center[1] - 1),
+            (center[0] + 1, center[1] - 1),
+            (center[0] + 1, center[1]),
+            (center[0] + 1, center[1] + 1),
+        ]:
             if not (0 <= x < env.dimension and 0 <= y < env.dimension):
                 continue
             else:
@@ -48,4 +54,3 @@ while done is False:
         rewards.append(reward)
 
 print(sum(rewards))
-
