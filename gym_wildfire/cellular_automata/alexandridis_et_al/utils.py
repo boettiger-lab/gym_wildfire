@@ -29,7 +29,8 @@ def tg(x):
 
 def get_slope(wildfire_ca):
     slope_matrix = [
-        [0 for col in range(wildfire_ca.n_col)] for row in range(wildfire_ca.n_row)
+        [0 for col in range(wildfire_ca.n_col)]
+        for row in range(wildfire_ca.n_row)
     ]
     for row in range(wildfire_ca.n_row):
         for col in range(wildfire_ca.n_col):
@@ -51,7 +52,8 @@ def get_slope(wildfire_ca):
                 / 1.414
             )
             sub_slope_matrix[0][1] = tg(
-                current_altitude - wildfire_ca._current_state[(row - 1, col)].state[3]
+                current_altitude
+                - wildfire_ca._current_state[(row - 1, col)].state[3]
             )
             sub_slope_matrix[0][2] = tg(
                 (
@@ -61,11 +63,13 @@ def get_slope(wildfire_ca):
                 / 1.414
             )
             sub_slope_matrix[1][0] = tg(
-                current_altitude - wildfire_ca._current_state[(row, col - 1)].state[3]
+                current_altitude
+                - wildfire_ca._current_state[(row, col - 1)].state[3]
             )
             sub_slope_matrix[1][1] = 0
             sub_slope_matrix[1][2] = tg(
-                current_altitude - wildfire_ca._current_state[(row, col + 1)].state[3]
+                current_altitude
+                - wildfire_ca._current_state[(row, col + 1)].state[3]
             )
             sub_slope_matrix[2][0] = tg(
                 (
@@ -75,7 +79,8 @@ def get_slope(wildfire_ca):
                 / 1.414
             )
             sub_slope_matrix[2][1] = tg(
-                current_altitude - wildfire_ca._current_state[(row + 1, col)].state[3]
+                current_altitude
+                - wildfire_ca._current_state[(row + 1, col)].state[3]
             )
             sub_slope_matrix[2][2] = tg(
                 (

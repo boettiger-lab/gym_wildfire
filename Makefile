@@ -1,5 +1,5 @@
 SHELL=/bin/bash
-LINT_PATHS=gym_wildfire/ setup.py
+LINT_PATHS=gym_wildfire/ tests/ setup.py
 
 pytest:
 	./scripts/run_tests.sh

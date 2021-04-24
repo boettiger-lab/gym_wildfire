@@ -1,12 +1,14 @@
-import numpy as np
-import gym
-from gym import spaces, logger, error, utils
-from gym.utils import seeding
-import random
-from pandas import DataFrame
 import time
-from gym_wildfire.cellular_automata.alexandridis_et_al.wildfire_ca import wildfireCA
-from tkinter import *
+from tkinter import Canvas, Tk
+
+import gym
+import numpy as np
+from gym import spaces
+from pandas import DataFrame
+
+from gym_wildfire.cellular_automata.alexandridis_et_al.wildfire_ca import (
+    wildfireCA,
+)
 
 NO_FUEL = 0
 UNBURNED_FUEL = 40
@@ -36,21 +38,29 @@ class EnvWildfireCA(gym.Env):
         wind_velocity=5,
     ):
         self.dimension = dimension
-        self.factor = 20  # This determines how big a cell will appear graphically
+        self.factor = (
+            20  # This determines how big a cell will appear graphically
+        )
         self.display_width = self.factor * self.dimension
         self.observation_space = spaces.Box(
-            low=0, high=255, shape=(self.dimension, self.dimension, 1), dtype=np.uint8
+            low=0,
+            high=255,
+            shape=(self.dimension, self.dimension, 1),
+            dtype=np.uint8,
         )
         # An agent can select 2 cells for preventative burns
-        self.action_space = spaces.MultiDiscrete([self.dimension for i in range(2)])
+        self.action_space = spaces.MultiDiscrete(
+            [self.dimension for i in range(2)]
+        )
         self.wildfire_ca = wildfireCA(
-            thetas=thetas, wind_velocity=wind_velocity, n_row=dimension, n_col=dimension
+            thetas=thetas,
+            wind_velocity=wind_velocity,
+            n_row=dimension,
+            n_col=dimension,
         )
         self.thetas = thetas
         self.wind_velocity = wind_velocity
-        self.lag = (
-            8  # How many time steps do you allow agent to have before evolving model
-        )
+        self.lag = 8  # time steps for agent before evolving model
         self.time = 0
         self.Tmax = 800
         self.sleep = 0.05
@@ -75,27 +85,29 @@ class EnvWildfireCA(gym.Env):
         action = list(action)
         position_tup = ()
         # I check to make sure that there are no Nones in the action
-        # as in my reactive_agent script, I use Nones to denote skipping an action
-        if action[0] != None:
+        # as in my reactive_agent script, I use Nones for skipping an action
+        if action[0] is not None:
             position_tup = (action[0], action[1])
         self.time += 1  # Advance a timestep
         self.state = []
         self.reward = 0
         # Going through every cell in the model
         for cell in self.wildfire_ca._current_state:
-            # Where there is a preventative burn inputted in action, burn the cell
+            # Where there is a prevent. burn inputted, burn the cell
             if (
                 cell == position_tup
-                and self.wildfire_ca._current_state[cell].state[0] == UNBURNED_FUEL
+                and self.wildfire_ca._current_state[cell].state[0]
+                == UNBURNED_FUEL
             ):
-                self.wildfire_ca._current_state[cell].state[0] = PREVENTATIVE_BURNED
-            # Penalize the agent based on how many actively burning cells there are
+                self.wildfire_ca._current_state[cell].state[
+                    0
+                ] = PREVENTATIVE_BURNED
+            # Penalize the agent acc. to # of actively burning cells
             if self.wildfire_ca._current_state[cell].state[0] == BURNING_FUEL:
                 self.reward -= 1
 
         if self.time == self.Tmax or self.reward == 0:
             self.done = True
-        # Only evolving every 8 time steps to allow agent to burn 8 cells at a time
         if self.time % self.lag == 0:
             self.wildfire_ca.evolve()
         # Recording the state to report as the observation
@@ -138,7 +150,9 @@ class EnvWildfireCA(gym.Env):
                     import pdb
 
                     pdb.set_trace()
-                color = CMAP[self.wildfire_ca._current_state[(column, row)].state[0]]
+                color = CMAP[
+                    self.wildfire_ca._current_state[(column, row)].state[0]
+                ]
                 self.canvas_rect[row, column] = self.canvas.create_rectangle(
                     x1, y1, x2, y2, fill=color
                 )
@@ -157,7 +171,9 @@ class EnvWildfireCA(gym.Env):
                 if done:
                     break
             row.append([t + 1, obs, None, reward, rep])
-        df = DataFrame(row, columns=["time", "state", "action", "reward", "rep"])
+        df = DataFrame(
+            row, columns=["time", "state", "action", "reward", "rep"]
+        )
         return df
 
     def close(self):
