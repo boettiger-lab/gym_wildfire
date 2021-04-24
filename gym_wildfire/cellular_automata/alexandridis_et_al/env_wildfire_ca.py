@@ -16,7 +16,7 @@ PREVENTATIVE_BURNED = 160
 
 # CMAP is a color map used in GUI display
 CMAP = {NO_FUEL: "white", UNBURNED_FUEL: "tan",
-    BURNING_FUEL: "red", BURNED: "black", PREVENTATIVE_BURNED:"blue"}
+        BURNING_FUEL: "red", BURNED: "black", PREVENTATIVE_BURNED: "blue"}
 
 
 class EnvWildfireCA(gym.Env):
@@ -25,14 +25,18 @@ class EnvWildfireCA(gym.Env):
 
     def __init__(self, display=False, dimension=36, thetas=[[45, 0, 45], [90, 0, 90], [135, 180, 135]], wind_velocity=5):
         self.dimension = dimension
-        self.factor = 20 # This determines how big a cell will appear graphically
+        self.factor = 20  # This determines how big a cell will appear graphically
         self.display_width = self.factor * self.dimension
-        self.observation_space = spaces.Box(low=0, high=255, shape=(self.dimension, self.dimension, 1), dtype=np.uint8)
-        self.action_space = spaces.MultiDiscrete([self.dimension for i in range(2)]) # An agent can select 2 cells for preventative burns
-        self.wildfire_ca = wildfireCA(thetas=thetas, wind_velocity=wind_velocity, n_row=dimension, n_col=dimension)
+        self.observation_space = spaces.Box(low=0, high=255, shape=(
+            self.dimension, self.dimension, 1), dtype=np.uint8)
+        # An agent can select 2 cells for preventative burns
+        self.action_space = spaces.MultiDiscrete(
+            [self.dimension for i in range(2)])
+        self.wildfire_ca = wildfireCA(
+            thetas=thetas, wind_velocity=wind_velocity, n_row=dimension, n_col=dimension)
         self.thetas = thetas
         self.wind_velocity = wind_velocity
-        self.lag = 8 # How many time steps do you allow agent to have before evolving model
+        self.lag = 8  # How many time steps do you allow agent to have before evolving model
         self.time = 0
         self.Tmax = 800
         self.sleep = 0.05
@@ -54,7 +58,7 @@ class EnvWildfireCA(gym.Env):
         # as in my reactive_agent script, I use Nones to denote skipping an action
         if action[0] != None:
             position_tup = (action[0], action[1])
-        self.time += 1 # Advance a timestep
+        self.time += 1  # Advance a timestep
         self.state = []
         self.reward = 0
         # Going through every cell in the model
@@ -79,7 +83,8 @@ class EnvWildfireCA(gym.Env):
         return np.array(self.state).reshape(self.dimension, self.dimension, 1), self.reward, self.done, {}
 
     def reset(self):
-        self.wildfire_ca = wildfireCA(thetas=self.thetas, wind_velocity=self.wind_velocity, n_row=self.dimension, n_col=self.dimension)
+        self.wildfire_ca = wildfireCA(
+            thetas=self.thetas, wind_velocity=self.wind_velocity, n_row=self.dimension, n_col=self.dimension)
         self.time = 0
         self.done = False
         if self.display:
@@ -98,9 +103,12 @@ class EnvWildfireCA(gym.Env):
                 x2 = x1 + self.factor
                 y2 = y1 + self.factor
                 if self.debug_flag:
-                    import pdb; pdb.set_trace()
-                color = CMAP[self.wildfire_ca._current_state[(column, row)].state[0]]
-                self.canvas_rect[row, column] = self.canvas.create_rectangle(x1, y1, x2, y2, fill=color)
+                    import pdb
+                    pdb.set_trace()
+                color = CMAP[self.wildfire_ca._current_state[(
+                    column, row)].state[0]]
+                self.canvas_rect[row, column] = self.canvas.create_rectangle(
+                    x1, y1, x2, y2, fill=color)
         self.tk.update()
         time.sleep(self.sleep)
 
@@ -116,7 +124,8 @@ class EnvWildfireCA(gym.Env):
                 if done:
                     break
             row.append([t+1, obs, None, reward, rep])
-        df = DataFrame(row, columns=['time', 'state', 'action', 'reward', 'rep'])
+        df = DataFrame(
+            row, columns=['time', 'state', 'action', 'reward', 'rep'])
         return df
 
     def close(self):
