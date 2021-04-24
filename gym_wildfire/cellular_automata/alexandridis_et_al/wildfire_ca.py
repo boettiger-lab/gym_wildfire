@@ -25,8 +25,12 @@ wind_velocity = 0
 
 class wildfireCA(CellularAutomaton):
     def __init__(self, thetas, wind_velocity, n_row=36, n_col=36):
-        super().__init__(dimension=[n_row, n_col],
-                         neighborhood=MooreNeighborhood(EdgeRule.IGNORE_MISSING_NEIGHBORS_OF_EDGE_CELLS))
+        super().__init__(
+            dimension=[n_row, n_col],
+            neighborhood=MooreNeighborhood(
+                EdgeRule.IGNORE_MISSING_NEIGHBORS_OF_EDGE_CELLS
+            ),
+        )
         self.n_row = n_row
         self.n_col = n_col
         self.add_position_index()
@@ -47,7 +51,7 @@ class wildfireCA(CellularAutomaton):
             # For whatever reason using `append` or += would add cell to every state;
             # this is only fix I can find to remedy this issue -- don't know why this is
             self._current_state[cell].state = self._current_state[cell].state + [cell]
-            self._current_state[cell].state[3] = cell[1]**4
+            self._current_state[cell].state[3] = cell[1] ** 4
 
     def evolve_rule(self, last_cell_state, neighbors_last_states):
         rand = random.random()
@@ -59,9 +63,9 @@ class wildfireCA(CellularAutomaton):
         # ignite with probability 0.58
         if last_cell_state[0] == UNBURNED_FUEL:
             p_h = 0.58
-            a = .078
-            p_veg = {40: -.3, 80: .3, 120: .4}[last_cell_state[1]]
-            p_den = {40: -.3, 80: .3, 120: .3}[last_cell_state[2]]
+            a = 0.078
+            p_veg = {40: -0.3, 80: 0.3, 120: 0.4}[last_cell_state[1]]
+            p_den = {40: -0.3, 80: 0.3, 120: 0.3}[last_cell_state[2]]
             for neighbor in neighbors_last_states:
                 if neighbor[0] == BURNING_FUEL:
                     x_loc = 1 + neighbor[-1][0] - last_cell_state[-1][0]
@@ -99,6 +103,8 @@ def state_to_color(current_state):
 
 
 if __name__ == "__main__":
-    CAWindow(cellular_automaton=wildfireCA(thetas, wind_velocity),
-             window_size=(1000, 830),
-             state_to_color_cb=state_to_color).run(evolutions_per_second=1)
+    CAWindow(
+        cellular_automaton=wildfireCA(thetas, wind_velocity),
+        window_size=(1000, 830),
+        state_to_color_cb=state_to_color,
+    ).run(evolutions_per_second=1)
