@@ -36,6 +36,7 @@ spelling:
 
 clean:
 	rm -rf *test.png
+	rm -rf *trash*
 	cd docs && make clean
 
 # PyPi package release
