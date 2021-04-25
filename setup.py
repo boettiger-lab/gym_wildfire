@@ -1,10 +1,10 @@
 # setup.py
-from setuptools import setup
+from setuptools import find_packages, setup
 
 setup(
     name="gym_wildfire",
     version="0.0.0",
-    packages=setuptools.find_packages(exclude=["docs", "scripts", "tests"]),
+    packages=find_packages(exclude=["docs", "scripts", "tests"]),
     install_requires=[
         "gym",
         "numpy",
