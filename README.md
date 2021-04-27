@@ -4,7 +4,7 @@ This repository provides [OpenAI-gym](https://github.com/openai/gym/) class defi
 
 ## Installation
 
-Run `pip install -e .` and `pip install -r requirements.txt` from the home directory (preferably in a separate virtual environmetn) to get everything ready to run.
+Run `pip install -e .` from the home directory (preferably in a separate virtual environmetn) to get everything ready to run.
 
 ## Environments
 
