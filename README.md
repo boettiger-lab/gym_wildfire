@@ -10,6 +10,6 @@ Run `pip install -e .` from the home directory (preferably in a separate virtual
 
 So far, we have the following environments defined:
 
-- `wildfireCA-v0`: This defines a wildfire cellular automata model, based off of [Alexandridis et al.](https://www.sciencedirect.com/science/article/abs/pii/S0096300308004943). The dynamics here are quite simple, allowing for wind, variation in vegetation type and density, and elevation. The agent is allowed to do a variable number of preventative burns per evolution. 
+- `wildfireCA-v0`: This defines a wildfire cellular automata model, based off of [Alexandridis et al.](https://www.sciencedirect.com/science/article/abs/pii/S0096300308004943). The dynamics here are quite simple, allowing for wind, variation in vegetation type and density, and elevation. The agent is allowed to do a variable number of preventative burns per evolution time step. 
 
 
